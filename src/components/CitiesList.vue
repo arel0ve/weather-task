@@ -1,24 +1,9 @@
 <template>
   <div class="container">
-    <div class="row">
-      <div class="input-field">
-        <input v-model="currentCity" id="city_name" type="text"
-               :class="{valid: isCityValid, invalid: !isCityValid && isCityValid !== null}">
-        <label class="active" for="city_name">City</label>
-        <span class="helper-text" data-error="Wrong city name or bad internet connection"
-              data-success="City found">Input name of city</span>
-      </div>
-    </div>
-    <div class="row">
-      <a class="waves-effect waves-light btn" @click.prevent="getWeatherByCity(currentCity)">
-        <i class="material-icons right">cloud</i>
-        Check weather here and add city to local storage
-      </a>
-    </div>
-    <div class="row cities">
+    <div class="row justify-content-center cities">
       <WeatherAtCity v-for="city in selectedCities" :key="city.id" :cityWeather="city"/>
     </div>
-    <div class="row">The weather will update when you reload page</div>
+    <div class="row justify-content-center">{{ info }}</div>
   </div>
 </template>
 
@@ -34,7 +19,7 @@ export default {
     return {
       currentCity: '',
       selectedCities: [],
-      isCityValid: null
+      info: 'The weather will update when you reload page'
     }
   },
   created: function () {
@@ -48,9 +33,8 @@ export default {
     updateWeather: function () {
       this.selectedCities = []
       const cities = JSON.parse(localStorage.getItem('cities'))
-      localStorage.setItem('cities', '[]')
       for (let city of cities) {
-        this.getWeatherByCity(city.name)
+        this.getWeatherByCity(city)
       }
     },
     getWeatherByCity: function (city) {
@@ -66,16 +50,15 @@ export default {
           this.selectedCities.push({
             id: this.selectedCities.length,
             name: weather.name,
+            country: weather.sys.country,
             weather: weather.weather[0].main,
-            temp: Math.round((weather.main.temp - 273.15) * 100) / 100
+            temp: Math.round((weather.main.temp - 273.15) * 100) / 100,
+            humidity: weather.main.humidity
           })
-          console.log(this.selectedCities)
-          this.isCityValid = true
-          localStorage.setItem('cities', '[]')
-          localStorage.setItem('cities', JSON.stringify(this.selectedCities))
+          this.info = 'The weather will update when you reload page'
         })
         .catch(() => {
-          this.isCityValid = false
+          this.info = 'The weather will update when you reload page'
         })
     }
   }
@@ -84,10 +67,5 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
-a {
-  color: #d6f9f3;
-}
-.cities {
-  background: #b5a4a2;
-}
+
 </style>
